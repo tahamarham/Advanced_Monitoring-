@@ -1,0 +1,11 @@
+groups:
+  - name: auto-remediation-alerts
+    rules:
+      - alert: VictimAppDown
+        expr: up{job="victim_app"} == 0
+        for: 10s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Victim App is down"
+          description: "The victim_app container is dead. Auto-remediation required."

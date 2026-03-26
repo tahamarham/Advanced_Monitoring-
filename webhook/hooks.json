@@ -1,0 +1,16 @@
+[
+  {
+    "id": "restart-victim",
+    "execute-command": "/bin/sh",
+    "pass-arguments-to-command": [
+      {
+        "source": "string",
+        "name": "-c"
+      },
+      {
+        "source": "string",
+        "name": "curl -s -X POST --unix-socket /var/run/docker.sock http://localhost/containers/victim_app/start"
+      }
+    ]
+  }
+]

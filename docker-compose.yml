@@ -1,0 +1,82 @@
+version: '3.8'
+
+services:
+  # 1. The Core Monitoring Engine
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus:/etc/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+    networks:
+      - monitoring_network
+
+  # 2. The Alert Router
+  alertmanager:
+    image: prom/alertmanager:latest
+    container_name: alertmanager
+    ports:
+      - "9093:9093"
+    volumes:
+      - ./alertmanager:/etc/alertmanager
+    command:
+      - '--config.file=/etc/alertmanager/alertmanager.yml'
+    networks:
+      - monitoring_network
+
+  # 3. Your Visualization UI
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+    networks:
+      - monitoring_network
+
+  # 4. Container Metric Collector (Tracks if containers go down)
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    ports:
+      - "8080:8080"
+    volumes:
+      - /:/rootfs:ro
+      - /var/run:/var/run:ro
+      - /sys:/sys:ro
+      - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - monitoring_network
+
+  # 5. The "Victim" Application
+ # 4. The "Victim" Application (Native Prometheus Exporter)
+  victim_app:
+    image: prom/node-exporter:latest
+    container_name: victim_app
+    ports:
+      - "9100:9100"
+    networks:
+      - monitoring_network
+
+  # 5. The Auto-Remediation Webhook
+  webhook:
+    image: almir/webhook
+    container_name: auto_healer
+    user: root
+    ports:
+      - "9000:9000"
+    volumes:
+      - ./webhook/hooks.json:/etc/webhook/hooks.json:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    entrypoint: >
+      /bin/sh -c "apk add --no-cache curl && /usr/local/bin/webhook -verbose -hooks=/etc/webhook/hooks.json -hotreload"
+    networks:
+      - monitoring_network
+
+networks:
+  monitoring_network:
+    driver: bridge
