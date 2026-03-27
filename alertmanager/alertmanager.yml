@@ -10,5 +10,5 @@ receivers:
     webhook_configs:
       # L'URL pointe vers le conteneur "webhook" sur le port 9000, 
       # et déclenche l'ID "restart-victim" défini dans ton hooks.json
-      - url: 'http://webhook:9000/hooks/restart-victim'
+      - url: 'http://webhook:9000/hooks/auto-restart'
         send_resolved: false

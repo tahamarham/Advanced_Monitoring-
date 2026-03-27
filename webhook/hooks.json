@@ -1,7 +1,14 @@
 [
   {
-    "id": "restart-victim",
+    "id": "auto-restart",
     "execute-command": "/bin/sh",
+    "pass-environment-to-command": [
+      {
+        "source": "payload",
+        "name": "alerts.0.labels.job",
+        "envname": "TARGET_CONTAINER"
+      }
+    ],
     "pass-arguments-to-command": [
       {
         "source": "string",
@@ -9,7 +16,7 @@
       },
       {
         "source": "string",
-        "name": "curl -s -X POST --unix-socket /var/run/docker.sock http://localhost/containers/victim_app/start"
+        "name": "curl -s -X POST --unix-socket /var/run/docker.sock http://localhost/containers/${TARGET_CONTAINER}/start"
       }
     ]
   }
