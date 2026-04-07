@@ -28,3 +28,12 @@ scrape_configs:
   - job_name: 'cadvisor'
     static_configs:
       - targets: ['cadvisor:8080']
+
+  - job_name: 'java_app'
+    metrics_path: '/actuator/prometheus' # Chemin classique pour les métriques JVM
+    static_configs:
+      - targets: ['java_app:8080']
+
+  - job_name: 'FBB_app'
+    static_configs:
+      - targets: ['FBB_app:9898']
