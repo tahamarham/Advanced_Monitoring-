@@ -32,7 +32,7 @@ scrape_configs:
   - job_name: 'java_app'
     metrics_path: '/actuator/prometheus' # Chemin classique pour les métriques JVM
     static_configs:
-      - targets: ['java_app:8080']
+      - targets: ['java_app:9411']
 
   - job_name: 'FBB_app'
     static_configs:

@@ -85,11 +85,11 @@ services:
     networks:
       - monitoring_network
   java_app:
-    image: micrometer/spring-boot-sample-prometheus:latest
+    image: openzipkin/zipkin:latest
     container_name: java_app
     user : root
     ports:
-      - "8080:8080"
+      - "9411:9411"
     networks:
       - monitoring_network
 networks:
