@@ -1,13 +1,25 @@
-
- groups:
+groups:
   - name: auto-remediation-alerts
     rules:
+      # 1. The HEALER Trigger
+      # This alert tells the webhook to restart the container.
       - alert: ContainerDown
-        # Au lieu de cibler un nom précis, on cible tous les jobs sauf prometheus lui-même
         expr: up{job!="prometheus"} == 0
         for: 10s
         labels:
-          severity: critical
+          # Changed to 'automated-remediation' to match the Alertmanager route
+          severity: automated-remediation
         annotations:
           summary: "Le conteneur {{ $labels.job }} est tombé"
           description: "Auto-remédiation requise pour {{ $labels.job }}."
+
+      # 2. The SUPERVISOR Trigger (The "Condition")
+      # This alert fires if Rule #1 has fired more than 3 times in 24 hours.
+      - alert: FrequentCrashLoop
+        expr: count_over_time(ALERTS{alertname="ContainerDown", alertstate="firing"}[24h]) > 3
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "CRITICAL: {{ $labels.job }} is in a crash loop"
+          description: "This container has crashed 3+ times today. Manual investigation required."

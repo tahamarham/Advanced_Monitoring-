@@ -103,17 +103,6 @@ services:
     networks:
       - monitoring_network
 
-  anythingllm:
-    image: mintplexlabs/anythingllm
-    container_name: anythingllm
-    ports:
-      - "3001:3001"
-    environment:
-      - STORAGE_DIR=/app/server/storage
-    volumes:
-      - ./anythingllm_storage:/app/server/storage
-    networks:
-      - monitoring_network
 networks:
   monitoring_network:
     driver: bridge

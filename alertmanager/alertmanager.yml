@@ -1,14 +1,33 @@
 route:
-  group_by: ['alertname']
-  group_wait: 5s       # Attendre 5s pour grouper les alertes
-  group_interval: 5s   # Délai entre deux groupes d'alertes
-  repeat_interval: 1h  # Ne pas spammer si ça reste cassé
+  # Grouping by 'job' ensures that if multiple containers fail, 
+  # they are handled as separate remediation tasks.
+  group_by: ['alertname', 'job']
+  group_wait: 5s
+  group_interval: 5s
+  repeat_interval: 1h
+  
+  # Default receiver if no specific route matches
   receiver: 'webhook-healer'
+
+  routes:
+    # ROUTE 1: The Automated Healer
+    # This only triggers the restart command.
+    - match:
+        severity: automated-remediation
+      receiver: 'webhook-healer'
+      repeat_interval: 10m  # Throttles restarts to once every 10 mins
+
+
+    - match:
+        severity: critical
+      receiver: 'critical-notification'
 
 receivers:
   - name: 'webhook-healer'
     webhook_configs:
-      # L'URL pointe vers le conteneur "webhook" sur le port 9000, 
-      # et déclenche l'ID "restart-victim" défini dans ton hooks.json
       - url: 'http://webhook:9000/hooks/auto-restart'
         send_resolved: false
+
+  - name: 'critical-notification'
+    webhook_configs:
+      - url: 'http://webhook:9000/hooks/log-critical-alert'
